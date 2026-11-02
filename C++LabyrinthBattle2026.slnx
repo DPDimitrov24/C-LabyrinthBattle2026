@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="C++LabyrinthBattle2026/C++LabyrinthBattle2026.vcxproj" Id="5a9c365e-70dc-4efb-a1c0-416c14679dbb" />
+</Solution>
