@@ -1,5 +1,4 @@
 #include <iostream>
-#include <string>
 #include <ctime>
 #include <cstdlib>
 #include <conio.h>
@@ -7,32 +6,6 @@
 
 using namespace std;
 
-void menu();
-
-char** createMaze(int size);
-void deleteMaze(char** maze, int size);
-
-void generateMaze(char** maze, int size);
-
-void drawMaze(
-    char** maze,
-    int size,
-    int playerRow,
-    int playerCol);
-
-bool movePlayer(
-    char** maze,
-    int size,
-    int& playerRow,
-    int& playerCol,
-    int direction);
-
-bool isWin(
-    int playerRow,
-    int playerCol,
-    int size);
-
-// Creating labyrinth
 char** createMaze(int size)
 {
     char** maze = new char* [size];
@@ -45,7 +18,6 @@ char** createMaze(int size)
     return maze;
 }
 
-// Deleting labyrinth
 void deleteMaze(char** maze, int size)
 {
     for (int i = 0; i < size; i++)
@@ -56,7 +28,6 @@ void deleteMaze(char** maze, int size)
     delete[] maze;
 }
 
-// Генериране на лабиринта
 void generateMaze(char** maze, int size)
 {
     for (int i = 0; i < size; i++)
@@ -77,9 +48,9 @@ void generateMaze(char** maze, int size)
         maze[i][size - 1] = ' ';
     }
 
-    for (int i = 0; i < size; i++)
+    for (int i = 1; i < size - 1; i++)
     {
-        for (int j = 0; j < size; j++)
+        for (int j = 1; j < size - 1; j++)
         {
             if (rand() % 100 < 60)
             {
@@ -88,20 +59,25 @@ void generateMaze(char** maze, int size)
         }
     }
 
+    maze[0][0] = ' ';
     maze[size - 1][size - 1] = 'E';
 }
 
-// Изобразяване на лабиринта
-void drawMaze(
-    char** maze,
-    int size,
-    int playerRow,
-    int playerCol)
+void drawGame(char** maze, int size, int playerRow, int playerCol)
 {
     system("cls");
 
+    for (int i = 0; i < size + 2; i++)
+    {
+        cout << "# ";
+    }
+
+    cout << endl;
+
     for (int i = 0; i < size; i++)
     {
+        cout << "# ";
+
         for (int j = 0; j < size; j++)
         {
             if (i == playerRow && j == playerCol)
@@ -114,29 +90,27 @@ void drawMaze(
             }
         }
 
+        cout << "#";
         cout << endl;
     }
+
+    for (int i = 0; i < size + 2; i++)
+    {
+        cout << "# ";
+    }
+
+    cout << endl;
 }
 
-// Проверка за победа
-bool isWin(
-    int playerRow,
-    int playerCol,
-    int size)
-{
-    return playerRow == size - 1 && playerCol == size - 1;
-}
-
-// Движение на играча
 bool movePlayer(
     char** maze,
     int size,
-    int& playerRow,
-    int& playerCol,
+    int& row,
+    int& col,
     int direction)
 {
-    int newRow = playerRow;
-    int newCol = playerCol;
+    int newRow = row;
+    int newCol = col;
 
     switch (direction)
     {
@@ -170,56 +144,116 @@ bool movePlayer(
         return false;
     }
 
-    playerRow = newRow;
-    playerCol = newCol;
+    row = newRow;
+    col = newCol;
 
     return true;
 }
 
-// Меню
-void menu()
+bool isWin(int row, int col, int size)
 {
-    cout << "===== LABYRINTH BATTLE 2026 =====" << endl;
-    cout << "1. New Game" << endl;
-    cout << "2. Exit" << endl;
+    return row == size - 1 &&
+        col == size - 1;
 }
 
-// Главна функция
-int main()
+void showTips()
 {
-    srand((unsigned int)time(0));
+    system("cls");
 
-    menu();
+    cout << "===== TIPS =====" << endl;
+    cout << endl;
+
+    cout << "P = Player" << endl;
+    cout << "# = Wall" << endl;
+    cout << "E = Exit" << endl;
+
+    cout << endl;
+
+    cout << "Reach the exit in the lower right corner."
+        << endl;
+
+    cout << "You cannot move through walls."
+        << endl;
+
+    cout << endl;
+
+    cout << "Press any key...";
+    _getch();
+}
+
+void showMenu()
+{
+    system("cls");
+
+    cout << "===== LABYRINTH GAME =====" << endl;
+    cout << endl;
+
+    cout << "1. New Game" << endl;
+    cout << "2. Tips" << endl;
+    cout << "3. Options" << endl;
+    cout << "4. Exit" << endl;
+
+    cout << endl;
+    cout << "Choice: ";
+}
+
+void showOptions(int& controls)
+{
+    system("cls");
+
+    cout << "===== OPTIONS =====" << endl;
+    cout << endl;
+
+    cout << "1. Arrow Keys" << endl;
+    cout << "2. WASD" << endl;
+
+    cout << endl;
 
     int choice;
-    cout << "Choose: ";
     cin >> choice;
 
-    if (choice == 1)
+    while (choice < 1 || choice > 2)
     {
-        int size;
+        cout << "Invalid choice. Try again: ";
+        cin >> choice;
+    }
 
-        do
+    controls = choice;
+}
+
+void startGame(int controls)
+{
+    int size;
+
+    cout << "Enter maze size (10-50): ";
+    cin >> size;
+
+    while (size < 10 || size > 50)
+    {
+        cout << "Invalid size. Enter again: ";
+        cin >> size;
+    }
+
+    char** maze = createMaze(size);
+
+    generateMaze(maze, size);
+
+    int playerRow = 0;
+    int playerCol = 0;
+    int steps = 0;
+
+    while (!isWin(playerRow, playerCol, size))
+    {
+        drawGame(
+            maze,
+            size,
+            playerRow,
+            playerCol);
+
+        cout << "Steps: " << steps << endl;
+
+        if (controls == 1)
         {
-            cout << "Size (10-50): ";
-            cin >> size;
-        } while (size < 10 || size > 50);
-
-        char** maze = createMaze(size);
-
-        generateMaze(maze, size);
-
-        int playerRow = 0;
-        int playerCol = 0;
-
-        while (!isWin(playerRow, playerCol, size))
-        {
-            drawMaze(
-                maze,
-                size,
-                playerRow,
-                playerCol);
-
             int key = _getch();
 
             if (key == 224)
@@ -229,59 +263,164 @@ int main()
                 switch (key)
                 {
                 case 72:
-                    movePlayer(
+                    if (movePlayer(
                         maze,
                         size,
                         playerRow,
                         playerCol,
-                        1);
+                        1))
+                    {
+                        steps++;
+                    }
                     break;
 
                 case 80:
-                    movePlayer(
+                    if (movePlayer(
                         maze,
                         size,
                         playerRow,
                         playerCol,
-                        2);
+                        2))
+                    {
+                        steps++;
+                    }
                     break;
 
                 case 75:
-                    movePlayer(
+                    if (movePlayer(
                         maze,
                         size,
                         playerRow,
                         playerCol,
-                        3);
+                        3))
+                    {
+                        steps++;
+                    }
                     break;
 
                 case 77:
-                    movePlayer(
+                    if (movePlayer(
                         maze,
                         size,
                         playerRow,
                         playerCol,
-                        4);
+                        4))
+                    {
+                        steps++;
+                    }
                     break;
                 }
             }
         }
+        else
+        {
+            char key = tolower(_getch());
 
-        drawMaze(
-            maze,
-            size,
-            playerRow,
-            playerCol);
+            switch (key)
+            {
+            case 'w':
+                if (movePlayer(
+                    maze,
+                    size,
+                    playerRow,
+                    playerCol,
+                    1))
+                {
+                    steps++;
+                }
+                break;
 
-        cout << "YOU WIN!!!" << endl;
+            case 's':
+                if (movePlayer(
+                    maze,
+                    size,
+                    playerRow,
+                    playerCol,
+                    2))
+                {
+                    steps++;
+                }
+                break;
 
-        deleteMaze(maze, size);
+            case 'a':
+                if (movePlayer(
+                    maze,
+                    size,
+                    playerRow,
+                    playerCol,
+                    3))
+                {
+                    steps++;
+                }
+                break;
+
+            case 'd':
+                if (movePlayer(
+                    maze,
+                    size,
+                    playerRow,
+                    playerCol,
+                    4))
+                {
+                    steps++;
+                }
+                break;
+            }
+        }
     }
 
-    else if (choice == 2)
+    drawGame(
+        maze,
+        size,
+        playerRow,
+        playerCol);
+
+    cout << endl;
+    cout << "YOU WIN!" << endl;
+    cout << "Steps: " << steps << endl;
+
+    cout << endl;
+    cout << "Press any key...";
+    _getch();
+
+    deleteMaze(maze, size);
+}
+
+int main()
+{
+    srand((unsigned)time(0));
+
+    int controls = 1;
+    int choice;
+
+    do
     {
-        cout << "Goodbye!" << endl;
-    }
+        showMenu();
+
+        cin >> choice;
+
+        while (choice < 1 || choice > 4)
+        {
+            cout << "Invalid choice. Try again: ";
+            cin >> choice;
+        }
+
+        switch (choice)
+        {
+        case 1:
+            startGame(controls);
+            break;
+
+        case 2:
+            showTips();
+            break;
+
+        case 3:
+            showOptions(controls);
+            break;
+        }
+
+    } while (choice != 4);
 
     return 0;
 }
