@@ -6,6 +6,13 @@
 
 using namespace std;
 
+void setColor(int color)
+{
+    SetConsoleTextAttribute(
+        GetStdHandle(STD_OUTPUT_HANDLE),
+        color);
+}
+
 char** createMaze(int size)
 {
     char** maze = new char* [size];
@@ -28,40 +35,24 @@ void deleteMaze(char** maze, int size)
     delete[] maze;
 }
 
-void generateMaze(char** maze, int size)
+void generateMaze(char** maze, int size, int difficulty)
 {
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-        {
-            maze[i][j] = '#';
-        }
-    }
+    int wallChance = 40;
 
-    for (int j = 0; j < size; j++)
+    switch (difficulty)
     {
-        maze[0][j] = ' ';
-    }
+    case 1:
+        wallChance = 20;
+        break;
 
-    for (int i = 0; i < size; i++)
-    {
-        maze[i][size - 1] = ' ';
-    }
+    case 2:
+        wallChance = 40;
+        break;
 
-    for (int i = 1; i < size - 1; i++)
-    {
-        for (int j = 1; j < size - 1; j++)
-        {
-            if (rand() % 100 < 60)
-            {
-                maze[i][j] = ' ';
-            }
-        }
+    case 3:
+        wallChance = 60;
+        break;
     }
-
-    maze[0][0] = ' ';
-    maze[size - 1][size - 1] = 'E';
-}
 
 void drawGame(char** maze, int size, int playerRow, int playerCol)
 {
@@ -82,7 +73,19 @@ void drawGame(char** maze, int size, int playerRow, int playerCol)
         {
             if (i == playerRow && j == playerCol)
             {
+                setColor(10);
+
                 cout << "P ";
+
+                setColor(7);
+            }
+            else if (maze[i][j] == 'E')
+            {
+                setColor(12);
+
+                cout << "E ";
+
+                setColor(7);
             }
             else
             {
@@ -197,32 +200,85 @@ void showMenu()
     cout << "Choice: ";
 }
 
-void showOptions(int& controls)
+void showOptions(int& controls, int& difficulty)
 {
     system("cls");
 
     cout << "===== OPTIONS =====" << endl;
     cout << endl;
 
-    cout << "1. Arrow Keys" << endl;
-    cout << "2. WASD" << endl;
+    // Selecting controls
+    cout << "===== CONTROLS =====" << endl;
+    cout << "1. Arrow Keys (Up, Down, Left, Right)" << endl;
+    cout << "2. WASD (W, A, S, D)" << endl;
 
     cout << endl;
+    cout << "Choose your controls (1-2): ";
 
     int choice;
     cin >> choice;
 
     while (choice < 1 || choice > 2)
     {
-        cout << "Invalid choice. Try again: ";
+        cout << "Invalid choice. Choose 1 or 2: ";
         cin >> choice;
     }
 
     controls = choice;
+
+    // Selecting difficulty
+    cout << endl;
+    cout << "===== DIFFICULTY =====" << endl;
+    cout << "1. Easy" << endl;
+    cout << "2. Normal" << endl;
+    cout << "3. Hard" << endl;
+
+    cout << endl;
+    cout << "Choose difficulty (1-3): ";
+
+    cin >> choice;
+
+    while (choice < 1 || choice > 3)
+    {
+        cout << "Invalid choice. Choose 1, 2 or 3: ";
+        cin >> choice;
+    }
+
+    difficulty = choice;
+
+    system("cls");
+
+    cout << "===== SETTINGS SAVED =====" << endl;
+    cout << endl;
+
+    cout << "Controls: ";
+
+    if (controls == 1)
+        cout << "Arrow Keys" << endl;
+    else
+        cout << "WASD" << endl;
+
+    cout << "Difficulty: ";
+
+    if (difficulty == 1)
+        cout << "Easy" << endl;
+    else if (difficulty == 2)
+        cout << "Normal" << endl;
+    else
+        cout << "Hard" << endl;
+
+    cout << endl;
+    cout << "Press any key to continue...";
+    _getch();
 }
 
-void startGame(int controls)
+void startGame(int controls, int difficulty)
 {
+    system("cls");
+
+    cout << "===== NEW GAME ====="
+        << endl << endl;
+
     int size;
 
     cout << "Enter maze size (10-50): ";
@@ -236,7 +292,7 @@ void startGame(int controls)
 
     char** maze = createMaze(size);
 
-    generateMaze(maze, size);
+    generateMaze(maze, size, difficulty);
 
     int playerRow = 0;
     int playerCol = 0;
@@ -391,36 +447,29 @@ int main()
     srand((unsigned)time(0));
 
     int controls = 1;
+    int difficulty = 2;
     int choice;
 
     do
     {
         showMenu();
+        cout << "Current controls: ";
 
-        cin >> choice;
+        if (controls == 1)
+            cout << "Arrow Keys";
+        else
+            cout << "WASD";
 
-        while (choice < 1 || choice > 4)
-        {
-            cout << "Invalid choice. Try again: ";
-            cin >> choice;
-        }
+        cout << endl;
 
-        switch (choice)
-        {
-        case 1:
-            startGame(controls);
-            break;
+        cout << "Current difficulty: ";
 
-        case 2:
-            showTips();
-            break;
+        if (difficulty == 1)
+            cout << "Easy";
+        else if (difficulty == 2)
+            cout << "Normal";
+        else
+            cout << "Hard";
 
-        case 3:
-            showOptions(controls);
-            break;
-        }
-
-    } while (choice != 4);
-
-    return 0;
+        cout << endl << endl;
 }
